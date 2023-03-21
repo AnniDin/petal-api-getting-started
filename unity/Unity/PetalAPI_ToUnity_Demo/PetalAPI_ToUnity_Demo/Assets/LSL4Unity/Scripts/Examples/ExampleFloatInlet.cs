@@ -11,9 +11,10 @@ namespace Assets.LSL4Unity.Scripts.Examples
     public class ExampleFloatInlet : AFloatInlet
     {
         public string lastSample = String.Empty;
-
+        public float[] lastSampleArray;
         protected override void Process(float[] newSample, double timeStamp)
         {
+            lastSampleArray = newSample;
             // just as an example, make a string out of all channel values of this sample
             lastSample = string.Join(" ", newSample.Select(c => c.ToString()).ToArray());
 

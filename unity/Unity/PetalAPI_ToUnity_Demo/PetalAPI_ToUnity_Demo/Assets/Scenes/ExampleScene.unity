@@ -317,11 +317,41 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moment: 0
-  StreamName: 
-  StreamType: Markers
-  sampleFromInlet: 
+  StreamName: PetalStream_eeg
+  StreamType: EEG
   lastSample: 
-  bandpowerAverageString: 
+  blinkAPI: PetalStream_blink
+  eyeAPI: PetalStream_eye
+  artifactAPI:
+  - 
+  - 
+  - 
+  - 
+  deltaPowerAPI:
+  - 0
+  - 0
+  - 0
+  - 0
+  thetaPowerAPI:
+  - 0
+  - 0
+  - 0
+  - 0
+  alphaPowerAPI:
+  - 0
+  - 0
+  - 0
+  - 0
+  betaPowerAPI:
+  - 0
+  - 0
+  - 0
+  - 0
+  bandpowerAverageAPI:
+  - 0
+  - 0
+  - 0
+  - 0
 --- !u!1001 &2009950680
 PrefabInstance:
   m_ObjectHideFlags: 0

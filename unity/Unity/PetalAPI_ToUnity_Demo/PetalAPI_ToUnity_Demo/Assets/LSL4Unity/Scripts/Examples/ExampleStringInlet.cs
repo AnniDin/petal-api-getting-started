@@ -13,6 +13,7 @@ namespace Assets.LSL4Unity.Scripts.Examples
     {
         //public string sampleFromInlet = String.Empty;
         public string lastSample = String.Empty;
+        public string[] lastSampleArray;
 
         public string blinkAPI = String.Empty;
         public string eyeAPI = String.Empty;
@@ -25,6 +26,7 @@ namespace Assets.LSL4Unity.Scripts.Examples
 
         protected override void Process(string[] newSample, double timeStamp)
         {
+            lastSampleArray = newSample;
             //print("working now");
             lastSample = string.Join(" ", newSample.Select(c => c.ToString()).ToArray());
             //print(GameObject.Find("LabStreamingLayer").GetComponent<ExampleStringInlet>().lastSample);
