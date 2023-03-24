@@ -14,6 +14,12 @@ public class MainManager : MonoBehaviour
 
     public int samplesToCalculateAverageCount = 20;
 
+    public TextMeshProUGUI countText;
+    public GameObject mainMenu;
+
+    [HideInInspector]
+    public bool averageCalculated = false;
+
     private ExampleFloatInlet LabfloatInlet;
     private ExampleStringInlet LabstringInlet;
 
@@ -32,10 +38,10 @@ public class MainManager : MonoBehaviour
     private float limitToDiscard = 250;
     private float velocity = 0.5f;
 
-    private bool averageCalculated = false;
     private bool loadingStarted = false;
     private bool loadingFinished = false;
     private bool reconectingStarted = false;
+    private bool start = false;
 
     // Start is called before the first frame update
     void Start()
@@ -53,6 +59,9 @@ public class MainManager : MonoBehaviour
 
         textMeshPro = LoadingScreen.transform.GetChild(LoadingScreen.transform.childCount - 1).gameObject.GetComponent<TextMeshProUGUI>();
 
+        countText.gameObject.SetActive(false);
+        mainMenu.SetActive(true);
+
         //line just to test the loading screen
         //loadingScreenManager.RevealLoadingScreen();
     }
@@ -60,90 +69,113 @@ public class MainManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (checkIfLastSampleIsValid(ConnectionfloatInlet))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (ConnectionfloatInlet.lastSampleArray.Last() == 1 && checkIfLastSampleIsValid(LabfloatInlet))
+            if (!start)
             {
-                //conexión establecida
+                start = true;
+                mainMenu.SetActive(false);
+                LoadingScreen.SetActive(true);
+            }
+            else
+            {
+                start = false;
+                mainMenu.SetActive(true);
+                LoadingScreen.SetActive(false);
+            }
+        }
 
-                if (!loadingStarted)
+        if (start)
+        {
+            if (checkIfLastSampleIsValid(ConnectionfloatInlet))
+            {
+                if (ConnectionfloatInlet.lastSampleArray.Last() == 1 && checkIfLastSampleIsValid(LabfloatInlet))
                 {
-                    textMeshPro.text = "Calibrating...";
-                    loadingScreenManager.RevealLoadingScreen();
-                    loadingStarted = true;
-                    reconectingStarted = false;
-                    loadingFinished = false;
-                }
-                
-                float ch2Value = LabfloatInlet.lastSampleArray[4];
-                float ch3Value = LabfloatInlet.lastSampleArray[5];
+                    //conexión establecida
 
-                if (!averageCalculated)
-                {
-                    if (samplesToCalculateAverageCount > 0 && !discard(ch2Value) && !discard(ch3Value))
+                    if (!loadingStarted)
                     {
-                        ch2Values.Add(ch2Value);
-                        ch3Values.Add(ch3Value);
-                        samplesToCalculateAverageCount -= 1;
-                    }
-                    else
-                    {
-                        float ch2Average = calculateAverage(ch2Values);
-                        float ch3Average = calculateAverage(ch3Values);
-
-                        ch2AverageNormalized = normalizeNumber(ch2Average);
-                        ch3AverageNormalized = normalizeNumber(ch3Average);
-
-                        velocity = (ch2AverageNormalized + ch3AverageNormalized) / 2;
-
-                        averageCalculated = true;
-                    }
-                }
-                else
-                {
-                    if (!loadingFinished)
-                    {
-                        loadingScreenManager.HideLoadingScreen();
-                        loadingFinished = true;
+                        textMeshPro.text = "Calibrating...";
+                        loadingScreenManager.RevealLoadingScreen();
+                        loadingStarted = true;
+                        reconectingStarted = false;
+                        loadingFinished = false;
                     }
 
-                    if (!discard(ch2Value) && !discard(ch3Value))
+                    float ch2Value = LabfloatInlet.lastSampleArray[4];
+                    float ch3Value = LabfloatInlet.lastSampleArray[5];
+
+                    if (!averageCalculated)
                     {
-                        float ch2Normalized = normalizeNumber(ch2Value);
-                        float ch3Normalized = normalizeNumber(ch3Value);
-
-                        if (ch2Normalized > ch2AverageNormalized && ch3Normalized < ch3AverageNormalized){
-                            //si el canal 2 aumenta y el 3 disminuye se está poniendo nervioso, aumentar velocidad
-
-                            velocity += ((ch2Normalized - ch2AverageNormalized) + (ch3AverageNormalized - ch3Normalized)) / 2;
-                        }
-                        else if (ch2Normalized < ch2AverageNormalized && ch3Normalized > ch3AverageNormalized)
+                        if (samplesToCalculateAverageCount > 0 && !discard(ch2Value) && !discard(ch3Value))
                         {
-                            //si el canal 2 disminuye y el 3 aumenta está tranquilo, disminuir velocidad
-                            velocity -= ((ch2AverageNormalized - ch2Normalized) + (ch3Normalized - ch3AverageNormalized)) / 2;
+                            ch2Values.Add(ch2Value);
+                            ch3Values.Add(ch3Value);
+                            samplesToCalculateAverageCount -= 1;
                         }
                         else
                         {
-                            //no hay cambios significativos, no hacer nada
+                            float ch2Average = calculateAverage(ch2Values);
+                            float ch3Average = calculateAverage(ch3Values);
+
+                            ch2AverageNormalized = normalizeNumber(ch2Average);
+                            ch3AverageNormalized = normalizeNumber(ch3Average);
+
+                            velocity = (ch2AverageNormalized + ch3AverageNormalized) / 2;
+
+                            averageCalculated = true;
+                        }
+                    }
+                    else
+                    {
+                        if (!loadingFinished)
+                        {
+                            loadingScreenManager.HideLoadingScreen();
+                            loadingFinished = true;
+                        }
+
+                        if (!discard(ch2Value) && !discard(ch3Value))
+                        {
+                            float ch2Normalized = normalizeNumber(ch2Value);
+                            float ch3Normalized = normalizeNumber(ch3Value);
+
+                            countText.gameObject.SetActive(true);
+                            countText.text = "Ch2: " + ch2Normalized + "   Ch3: " + ch3Normalized;
+
+                            if (ch2Normalized > ch2AverageNormalized && ch3Normalized < ch3AverageNormalized)
+                            {
+                                //si el canal 2 aumenta y el 3 disminuye se está poniendo nervioso, aumentar velocidad
+
+                                velocity += ((ch2Normalized - ch2AverageNormalized) + (ch3AverageNormalized - ch3Normalized)) / 2;
+                            }
+                            else if (ch2Normalized < ch2AverageNormalized && ch3Normalized > ch3AverageNormalized)
+                            {
+                                //si el canal 2 disminuye y el 3 aumenta está tranquilo, disminuir velocidad
+                                velocity -= ((ch2AverageNormalized - ch2Normalized) + (ch3Normalized - ch3AverageNormalized)) / 2;
+                            }
+                            else
+                            {
+                                //no hay cambios significativos, no hacer nada
+                            }
                         }
                     }
                 }
-            }
 
-            else if (ConnectionfloatInlet.lastSampleArray.Last() == 0 && !reconectingStarted)
+                else if (ConnectionfloatInlet.lastSampleArray.Last() == 0 && !reconectingStarted)
+                {
+                    //conexión perdida
+
+                    textMeshPro.text = "Connection lost. Trying to reconnect...";
+                    loadingScreenManager.RevealLoadingScreen();
+                    reconectingStarted = true;
+                    loadingStarted = false;
+                }
+            }
+            /*else if(checkIfLastSampleIsValid(null, ConnectionstringInlet))
             {
-                //conexión perdida
 
-                textMeshPro.text = "Connection lost. Trying to reconnect...";
-                loadingScreenManager.RevealLoadingScreen();
-                reconectingStarted = true;
-                loadingStarted = false;
-            }
+            }*/
         }
-        /*else if(checkIfLastSampleIsValid(null, ConnectionstringInlet))
-        {
-
-        }*/
     }
 
     private bool checkIfLastSampleIsValid(ExampleFloatInlet floatInlet = null, ExampleStringInlet stringInlet = null)

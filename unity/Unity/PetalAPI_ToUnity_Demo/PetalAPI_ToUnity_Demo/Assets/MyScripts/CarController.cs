@@ -35,9 +35,12 @@ public class CarController : MonoBehaviour
     {
         Camera.transform.position = new Vector3(transform.position.x, transform.position.y + cameraHeight, transform.position.z - distanceFromCarToCamera);
 
-        if (Input.GetKey("w"))
-        {
-            transform.Translate(mainManager.getVelocity() * forward * acceleration * Time.deltaTime);
+        if (mainManager.averageCalculated){
+            //if (Input.GetKey("w"))
+            //{
+                transform.Translate(mainManager.getVelocity() * forward * acceleration * Time.deltaTime);
+            //}
+            gameObject.GetComponent<Animator>().SetFloat("speed", mainManager.getVelocity());
         }
     }
 
