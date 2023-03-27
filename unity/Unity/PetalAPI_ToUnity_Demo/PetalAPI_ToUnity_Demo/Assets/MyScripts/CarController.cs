@@ -11,7 +11,7 @@ public class CarController : MonoBehaviour
     private float distanceFromCarToCamera = 10f;
     private float cameraHeight = 1f;
 
-    private float acceleration = 5;
+    private float acceleration = 1;
     private Vector3 forward = new Vector3(0, 0, 1);
 
     private GameObject firstEnviroment;
@@ -36,6 +36,8 @@ public class CarController : MonoBehaviour
         Camera.transform.position = new Vector3(transform.position.x, transform.position.y + cameraHeight, transform.position.z - distanceFromCarToCamera);
 
         if (mainManager.averageCalculated){
+
+            Debug.Log("entra");
             //if (Input.GetKey("w"))
             //{
                 transform.Translate(mainManager.getVelocity() * forward * acceleration * Time.deltaTime);

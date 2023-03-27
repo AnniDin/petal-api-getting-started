@@ -9,10 +9,9 @@ using UnityEngine;
 public class MainManager : MonoBehaviour
 {
     public GameObject LabStreamingLayer;
-    public GameObject ConnectionStatusLayer;
     public GameObject LoadingScreen;
 
-    public int samplesToCalculateAverageCount = 20;
+    public int samplesToCalculateAverageCount = 50;
 
     public TextMeshProUGUI countText;
     public GameObject mainMenu;
@@ -20,11 +19,9 @@ public class MainManager : MonoBehaviour
     [HideInInspector]
     public bool averageCalculated = false;
 
-    private ExampleFloatInlet LabfloatInlet;
-    private ExampleStringInlet LabstringInlet;
+    private MyFloatInlet LabfloatInlet;
 
     private ExampleFloatInlet ConnectionfloatInlet;
-    private ExampleStringInlet ConnectionstringInlet;
 
     private LoadingScreenManager loadingScreenManager;
     private TextMeshProUGUI textMeshPro; 
@@ -49,18 +46,18 @@ public class MainManager : MonoBehaviour
         ch2Values = new List<float>();
         ch3Values = new List<float>();
 
-        LabfloatInlet = LabStreamingLayer.GetComponent<ExampleFloatInlet>();
-        LabstringInlet = LabStreamingLayer.GetComponent<ExampleStringInlet>();
+        LabfloatInlet = LabStreamingLayer.GetComponent<MyFloatInlet>();
 
-        ConnectionfloatInlet = ConnectionStatusLayer.GetComponent<ExampleFloatInlet>();
-        ConnectionstringInlet = ConnectionStatusLayer.GetComponent<ExampleStringInlet>();
+        ConnectionfloatInlet = LabStreamingLayer.GetComponent<ExampleFloatInlet>();
 
         loadingScreenManager = LoadingScreen.GetComponent<LoadingScreenManager>();
 
-        textMeshPro = LoadingScreen.transform.GetChild(LoadingScreen.transform.childCount - 1).gameObject.GetComponent<TextMeshProUGUI>();
+        textMeshPro = LoadingScreen.transform.GetChild(LoadingScreen.transform.childCount - 1).gameObject.
+            transform.GetChild(0).GetComponent<TextMeshProUGUI>();
 
         countText.gameObject.SetActive(false);
         mainMenu.SetActive(true);
+        LoadingScreen.SetActive(false);
 
         //line just to test the loading screen
         //loadingScreenManager.RevealLoadingScreen();
@@ -87,34 +84,41 @@ public class MainManager : MonoBehaviour
 
         if (start)
         {
-            if (checkIfLastSampleIsValid(ConnectionfloatInlet))
+            if (!checkIfLastSampleIsValid(ConnectionfloatInlet) || 
+                (checkIfLastSampleIsValid(ConnectionfloatInlet) && 
+                ConnectionfloatInlet.lastSampleArray.Last() == 1))
             {
-                if (ConnectionfloatInlet.lastSampleArray.Last() == 1 && checkIfLastSampleIsValid(LabfloatInlet))
+                if (checkIfLastSampleIsValid(null, LabfloatInlet))
                 {
                     //conexión establecida
 
                     if (!loadingStarted)
                     {
                         textMeshPro.text = "Calibrating...";
-                        loadingScreenManager.RevealLoadingScreen();
+                        LoadingScreen.SetActive(true);
+                        //loadingScreenManager.RevealLoadingScreen();
                         loadingStarted = true;
                         reconectingStarted = false;
                         loadingFinished = false;
                     }
 
-                    float ch2Value = LabfloatInlet.lastSampleArray[4];
-                    float ch3Value = LabfloatInlet.lastSampleArray[5];
+                    float ch2Value = LabfloatInlet.lastSampleArray[1];
+                    float ch3Value = LabfloatInlet.lastSampleArray[2];
 
                     if (!averageCalculated)
                     {
+
+                        
                         if (samplesToCalculateAverageCount > 0 && !discard(ch2Value) && !discard(ch3Value))
                         {
+                            Debug.Log("Calculating average");
                             ch2Values.Add(ch2Value);
                             ch3Values.Add(ch3Value);
                             samplesToCalculateAverageCount -= 1;
                         }
-                        else
+                        else if (samplesToCalculateAverageCount <= 0)
                         {
+                            Debug.Log("Calculated");
                             float ch2Average = calculateAverage(ch2Values);
                             float ch3Average = calculateAverage(ch3Values);
 
@@ -130,6 +134,7 @@ public class MainManager : MonoBehaviour
                     {
                         if (!loadingFinished)
                         {
+                            Debug.Log("Hide");
                             loadingScreenManager.HideLoadingScreen();
                             loadingFinished = true;
                         }
@@ -151,7 +156,10 @@ public class MainManager : MonoBehaviour
                             else if (ch2Normalized < ch2AverageNormalized && ch3Normalized > ch3AverageNormalized)
                             {
                                 //si el canal 2 disminuye y el 3 aumenta está tranquilo, disminuir velocidad
-                                velocity -= ((ch2AverageNormalized - ch2Normalized) + (ch3Normalized - ch3AverageNormalized)) / 2;
+                                if (velocity - ((ch2AverageNormalized - ch2Normalized) + (ch3Normalized - ch3AverageNormalized)) / 2 >= 0)
+                                {
+                                    velocity -= ((ch2AverageNormalized - ch2Normalized) + (ch3Normalized - ch3AverageNormalized)) / 2;
+                                }
                             }
                             else
                             {
@@ -178,13 +186,13 @@ public class MainManager : MonoBehaviour
         }
     }
 
-    private bool checkIfLastSampleIsValid(ExampleFloatInlet floatInlet = null, ExampleStringInlet stringInlet = null)
+    private bool checkIfLastSampleIsValid(ExampleFloatInlet floatInlet = null, MyFloatInlet MyfloatInlet = null)
     {
         if (floatInlet != null && floatInlet.lastSampleArray != null && floatInlet.lastSampleArray.Length > 0)
         {
             return true;
         }
-        else if (stringInlet != null && stringInlet.lastSampleArray != null && stringInlet.lastSampleArray.Length > 0)
+        else if (MyfloatInlet != null && MyfloatInlet.lastSampleArray != null && MyfloatInlet.lastSampleArray.Length > 0)
         {
             return true;
         }

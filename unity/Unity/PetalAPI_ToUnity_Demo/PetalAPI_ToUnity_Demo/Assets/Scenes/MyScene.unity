@@ -134,6 +134,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: LabStreamingLayer
       objectReference: {fileID: 0}
+    - target: {fileID: 173216, guid: 341f3d812511a334eb88d59274891c3a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 458706, guid: 341f3d812511a334eb88d59274891c3a, type: 3}
       propertyPath: m_RootOrder
       value: 1
@@ -194,47 +198,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 225114661}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b9a33935d1bf5fb4ca40bcf2ef891243, type: 3}
+  m_Script: {fileID: 11500000, guid: 1da38a6a9335e8e48af8b17d9c369265, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   moment: 0
-  StreamName: PetalStream_eeg
-  StreamType: EEG
+  StreamName: PetalStream_connection_status
+  StreamType: BinaryConnectionStatus
   lastSample: 
   lastSampleArray: []
-  blinkAPI: PetalStream_blink
-  eyeAPI: PetalStream_eye
-  artifactAPI:
-  - 
-  - 
-  - 
-  - 
-  deltaPowerAPI:
-  - 0
-  - 0
-  - 0
-  - 0
-  thetaPowerAPI:
-  - 0
-  - 0
-  - 0
-  - 0
-  alphaPowerAPI:
-  - 0
-  - 0
-  - 0
-  - 0
-  betaPowerAPI:
-  - 0
-  - 0
-  - 0
-  - 0
-  bandpowerAverageAPI:
-  - 0
-  - 0
-  - 0
-  - 0
---- !u!114 &225114663
+--- !u!114 &225114664
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -243,7 +215,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 225114661}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1da38a6a9335e8e48af8b17d9c369265, type: 3}
+  m_Script: {fileID: 11500000, guid: 9c70c834061d77a4a8b1e9a10e5912b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   moment: 0
@@ -251,6 +223,26 @@ MonoBehaviour:
   StreamType: EEG
   lastSample: 
   lastSampleArray: []
+--- !u!114 &225114667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 225114661}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bc033cd2cffec7459d6fa31ad6a961b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  knownStreams: []
+  forgetStreamAfter: 1
+  onStreamFound:
+    m_PersistentCalls:
+      m_Calls: []
+  onStreamLost:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &291089633
 GameObject:
   m_ObjectHideFlags: 0
@@ -414,8 +406,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 40
-  m_fontSizeBase: 40
+  m_fontSize: 20
+  m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -494,9 +486,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LabStreamingLayer: {fileID: 225114661}
-  ConnectionStatusLayer: {fileID: 958800681}
   LoadingScreen: {fileID: 489921848}
-  samplesToCalculateAverageCount: 20
+  samplesToCalculateAverageCount: 500
   countText: {fileID: 535536620}
   mainMenu: {fileID: 291089633}
   averageCalculated: 0
@@ -715,7 +706,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 958800684}
-  - component: {fileID: 958800683}
   - component: {fileID: 958800682}
   m_Layer: 0
   m_Name: ConnectionStatusLayer
@@ -723,7 +713,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &958800682
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -733,61 +723,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 958800681}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b9a33935d1bf5fb4ca40bcf2ef891243, type: 3}
+  m_Script: {fileID: 11500000, guid: 9c70c834061d77a4a8b1e9a10e5912b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   moment: 0
   StreamName: PetalStream_connection_status
-  StreamType: 
-  lastSample: 
-  lastSampleArray: []
-  blinkAPI: PetalStream_blink
-  eyeAPI: PetalStream_eye
-  artifactAPI:
-  - 
-  - 
-  - 
-  - 
-  deltaPowerAPI:
-  - 0
-  - 0
-  - 0
-  - 0
-  thetaPowerAPI:
-  - 0
-  - 0
-  - 0
-  - 0
-  alphaPowerAPI:
-  - 0
-  - 0
-  - 0
-  - 0
-  betaPowerAPI:
-  - 0
-  - 0
-  - 0
-  - 0
-  bandpowerAverageAPI:
-  - 0
-  - 0
-  - 0
-  - 0
---- !u!114 &958800683
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 958800681}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1da38a6a9335e8e48af8b17d9c369265, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moment: 0
-  StreamName: PetalStream_connection_status
-  StreamType: 
+  StreamType: BinaryConnectionStatus
   lastSample: 
   lastSampleArray: []
 --- !u!4 &958800684
