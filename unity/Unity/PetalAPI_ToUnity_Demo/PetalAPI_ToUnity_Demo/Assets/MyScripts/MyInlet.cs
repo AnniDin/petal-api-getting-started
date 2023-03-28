@@ -48,7 +48,7 @@ namespace Assets.LSL4Unity.Scripts.AbstractInlets
                 resolver = new liblsl.ContinuousResolver("type ", StreamType);
             }
 
-            StartCoroutine(ResolveExpectedStream());
+            StartCoroutine(MyResolveExpectedStream());
 
             AdditionalStart();
         }
@@ -60,8 +60,10 @@ namespace Assets.LSL4Unity.Scripts.AbstractInlets
             //By default, do nothing.
         }
 
-        IEnumerator ResolveExpectedStream()
+        IEnumerator MyResolveExpectedStream()
         {
+
+            Debug.Log("MY COROUTINE");
             var results = resolver.results();
 
             yield return new WaitUntil(() => results.Length > 0);

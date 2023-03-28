@@ -24,6 +24,18 @@ public class LoadingScreenManager : MonoBehaviour
         _animatorComponent.SetTrigger("Hide");
     }
 
+    public string getCurrentAnimation()
+    {
+        if(gameObject.activeInHierarchy && _animatorComponent != null && _animatorComponent.GetCurrentAnimatorClipInfo(0).Length > 0)
+        {
+            return _animatorComponent.GetCurrentAnimatorClipInfo(0)[0].clip.name;
+
+        }
+        else{
+            return null;
+        }
+    }
+
     public void OnFinishedReveal()
     {
         // TODO: remove it and load your own scene !!

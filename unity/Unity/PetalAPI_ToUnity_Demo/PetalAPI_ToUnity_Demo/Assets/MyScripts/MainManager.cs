@@ -14,6 +14,7 @@ public class MainManager : MonoBehaviour
     public int samplesToCalculateAverageCount = 50;
 
     public TextMeshProUGUI countText;
+    public TextMeshProUGUI velocityText;
     public GameObject mainMenu;
 
     [HideInInspector]
@@ -32,7 +33,10 @@ public class MainManager : MonoBehaviour
     private float ch2AverageNormalized;
     private float ch3AverageNormalized;
 
-    private float limitToDiscard = 250;
+    private float previousCh2Normalized = 0;
+    private float previousCh3Normalized = 0;
+
+    private float limitToDiscard = 150;
     private float velocity = 0.5f;
 
     private bool loadingStarted = false;
@@ -56,6 +60,7 @@ public class MainManager : MonoBehaviour
             transform.GetChild(0).GetComponent<TextMeshProUGUI>();
 
         countText.gameObject.SetActive(false);
+        velocityText.gameObject.SetActive(false);
         mainMenu.SetActive(true);
         LoadingScreen.SetActive(false);
 
@@ -145,44 +150,78 @@ public class MainManager : MonoBehaviour
                             float ch3Normalized = normalizeNumber(ch3Value);
 
                             countText.gameObject.SetActive(true);
+                            velocityText.gameObject.SetActive(true);
                             countText.text = "Ch2: " + ch2Normalized + "   Ch3: " + ch3Normalized;
 
-                            if (ch2Normalized > ch2AverageNormalized && ch3Normalized < ch3AverageNormalized)
+                            if (previousCh2Normalized == 0 && previousCh3Normalized == 0)
                             {
-                                //si el canal 2 aumenta y el 3 disminuye se está poniendo nervioso, aumentar velocidad
-
-                                velocity += ((ch2Normalized - ch2AverageNormalized) + (ch3AverageNormalized - ch3Normalized)) / 2;
-                            }
-                            else if (ch2Normalized < ch2AverageNormalized && ch3Normalized > ch3AverageNormalized)
-                            {
-                                //si el canal 2 disminuye y el 3 aumenta está tranquilo, disminuir velocidad
-                                if (velocity - ((ch2AverageNormalized - ch2Normalized) + (ch3Normalized - ch3AverageNormalized)) / 2 >= 0)
+                                if (ch2Normalized > ch2AverageNormalized && ch3Normalized < ch3AverageNormalized)
                                 {
-                                    velocity -= ((ch2AverageNormalized - ch2Normalized) + (ch3Normalized - ch3AverageNormalized)) / 2;
+                                    //si el canal 2 aumenta y el 3 disminuye se está poniendo nervioso, aumentar velocidad
+                                    if (velocity + ((ch2Normalized - ch2AverageNormalized) + (ch3AverageNormalized - ch3Normalized)) / 2 <= 20)
+                                    {
+                                        velocity += ((ch2Normalized - ch2AverageNormalized) + (ch3AverageNormalized - ch3Normalized)) / 2;
+                                    }
                                 }
+                                else if (ch2Normalized < ch2AverageNormalized && ch3Normalized > ch3AverageNormalized)
+                                {
+                                    //si el canal 2 disminuye y el 3 aumenta está tranquilo, disminuir velocidad
+                                    if (velocity - ((ch2AverageNormalized - ch2Normalized) + (ch3Normalized - ch3AverageNormalized)) / 2 >= 0)
+                                    {
+                                        velocity -= ((ch2AverageNormalized - ch2Normalized) + (ch3Normalized - ch3AverageNormalized)) / 2;
+                                    }
+                                }
+                                else
+                                {
+                                    //no hay cambios significativos, no hacer nada
+                                }
+
+                                previousCh2Normalized = ch2Normalized;
+                                previousCh3Normalized = ch3Normalized;
                             }
+
                             else
                             {
-                                //no hay cambios significativos, no hacer nada
+                                if (ch2Normalized > ch2AverageNormalized && ch3Normalized < ch3AverageNormalized)
+                                {
+                                    //si el canal 2 aumenta y el 3 disminuye se está poniendo nervioso, aumentar velocidad
+                                    if (velocity + ((ch2Normalized - previousCh2Normalized) + (previousCh3Normalized - ch3Normalized)) / 2 <= 20)
+                                    {
+                                        velocity += ((ch2Normalized - previousCh2Normalized) + (previousCh3Normalized - ch3Normalized)) / 2;
+                                    }
+                                }
+                                else if (ch2Normalized < ch2AverageNormalized && ch3Normalized > ch3AverageNormalized)
+                                {
+                                    //si el canal 2 disminuye y el 3 aumenta está tranquilo, disminuir velocidad
+                                    if (velocity - ((previousCh2Normalized - ch2Normalized) + (ch3Normalized - previousCh3Normalized)) / 2 >= 0)
+                                    {
+                                        velocity -= ((previousCh2Normalized - ch2Normalized) + (ch3Normalized - previousCh3Normalized)) / 2;
+                                    }
+                                }
+                                else
+                                {
+                                    //no hay cambios significativos, no hacer nada
+                                }
+
+                                previousCh2Normalized = ch2Normalized;
+                                previousCh3Normalized = ch3Normalized;
                             }
+
                         }
                     }
                 }
 
-                else if (ConnectionfloatInlet.lastSampleArray.Last() == 0 && !reconectingStarted)
+                else if (checkIfLastSampleIsValid(ConnectionfloatInlet) && ConnectionfloatInlet.lastSampleArray.Last() == 0 && !reconectingStarted)
                 {
                     //conexión perdida
 
                     textMeshPro.text = "Connection lost. Trying to reconnect...";
+                    LoadingScreen.SetActive(true);
                     loadingScreenManager.RevealLoadingScreen();
                     reconectingStarted = true;
                     loadingStarted = false;
                 }
             }
-            /*else if(checkIfLastSampleIsValid(null, ConnectionstringInlet))
-            {
-
-            }*/
         }
     }
 

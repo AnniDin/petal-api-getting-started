@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class CarController : MonoBehaviour
@@ -7,12 +8,18 @@ public class CarController : MonoBehaviour
     public GameObject Camera;
     public GameObject enviromentPrefab;
     public MainManager mainManager;
+    public TextMeshProUGUI velocityText;
 
     private float distanceFromCarToCamera = 10f;
     private float cameraHeight = 1f;
 
     private float acceleration = 1;
     private Vector3 forward = new Vector3(0, 0, 1);
+    private float timeToActualizeVelocity = 2;
+    private float timer = 0;
+    private float averageVelocity = 0;
+
+    private List<float> velocityList = new List<float>();
 
     private GameObject firstEnviroment;
     private GameObject previousEnviroment;
@@ -28,6 +35,9 @@ public class CarController : MonoBehaviour
         actualEnviroment = firstEnviroment;
 
         terrainWidth = GameObject.Find("Terrain").gameObject.GetComponent<Terrain>().terrainData.size.x;
+
+        velocityList = new List<float>();
+        velocityText.text = "Calculating...";
     }
 
     // Update is called once per frame
@@ -35,15 +45,37 @@ public class CarController : MonoBehaviour
     {
         Camera.transform.position = new Vector3(transform.position.x, transform.position.y + cameraHeight, transform.position.z - distanceFromCarToCamera);
 
-        if (mainManager.averageCalculated){
+        if (mainManager.averageCalculated && 
+            mainManager.LoadingScreen.GetComponent<LoadingScreenManager>().getCurrentAnimation() == "[LS4] Hide")
+        {
+            velocityList.Add(mainManager.getVelocity());
+            timer += Time.deltaTime;
 
-            Debug.Log("entra");
+            if (timer >= timeToActualizeVelocity)
+            {
+                changeVelocity();
+                timer = 0;
+            }
+
             //if (Input.GetKey("w"))
             //{
-                transform.Translate(mainManager.getVelocity() * forward * acceleration * Time.deltaTime);
+            transform.Translate(averageVelocity * forward * acceleration * Time.deltaTime);
+            gameObject.GetComponent<Animator>().SetFloat("speed", averageVelocity);
             //}
-            gameObject.GetComponent<Animator>().SetFloat("speed", mainManager.getVelocity());
         }
+    }
+
+    private void changeVelocity()
+    {
+        foreach (float v in velocityList)
+        {
+            averageVelocity += v;
+        }
+
+        averageVelocity = averageVelocity / velocityList.Count;
+
+        velocityList.Clear();
+        velocityText.text = "Velocity: " + averageVelocity.ToString();
     }
 
     private void OnTriggerEnter(Collider other)
