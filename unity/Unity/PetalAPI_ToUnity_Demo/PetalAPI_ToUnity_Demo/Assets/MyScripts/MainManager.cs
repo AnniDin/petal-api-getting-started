@@ -116,14 +116,12 @@ public class MainManager : MonoBehaviour
                         
                         if (samplesToCalculateAverageCount > 0 && !discard(ch2Value) && !discard(ch3Value))
                         {
-                            Debug.Log("Calculating average");
                             ch2Values.Add(ch2Value);
                             ch3Values.Add(ch3Value);
                             samplesToCalculateAverageCount -= 1;
                         }
                         else if (samplesToCalculateAverageCount <= 0)
                         {
-                            Debug.Log("Calculated");
                             float ch2Average = calculateAverage(ch2Values);
                             float ch3Average = calculateAverage(ch3Values);
 
@@ -139,7 +137,6 @@ public class MainManager : MonoBehaviour
                     {
                         if (!loadingFinished)
                         {
-                            Debug.Log("Hide");
                             loadingScreenManager.HideLoadingScreen();
                             loadingFinished = true;
                         }
@@ -211,16 +208,28 @@ public class MainManager : MonoBehaviour
                     }
                 }
 
-                else if (checkIfLastSampleIsValid(ConnectionfloatInlet) && ConnectionfloatInlet.lastSampleArray.Last() == 0 && !reconectingStarted)
+                else
                 {
-                    //conexión perdida
+                    //no recibiendo los datos eeg
 
-                    textMeshPro.text = "Connection lost. Trying to reconnect...";
+                    textMeshPro.text = "Incapaz de recibir los datos, reinicia la aplicación.";
                     LoadingScreen.SetActive(true);
                     loadingScreenManager.RevealLoadingScreen();
                     reconectingStarted = true;
                     loadingStarted = false;
                 }
+
+            }
+
+            else if (checkIfLastSampleIsValid(ConnectionfloatInlet) && ConnectionfloatInlet.lastSampleArray.Last() == 0 && !reconectingStarted)
+            {
+                //conexión perdida
+
+                textMeshPro.text = "Connection lost. Trying to reconnect...";
+                LoadingScreen.SetActive(true);
+                loadingScreenManager.RevealLoadingScreen();
+                reconectingStarted = true;
+                loadingStarted = false;
             }
         }
     }

@@ -15,7 +15,7 @@ public class CarController : MonoBehaviour
 
     private float acceleration = 1;
     private Vector3 forward = new Vector3(0, 0, 1);
-    private float timeToActualizeVelocity = 2;
+    private float timeToActualizeVelocity = 1;
     private float timer = 0;
     private float averageVelocity = 0;
 
@@ -37,7 +37,7 @@ public class CarController : MonoBehaviour
         terrainWidth = GameObject.Find("Terrain").gameObject.GetComponent<Terrain>().terrainData.size.x;
 
         velocityList = new List<float>();
-        velocityText.text = "Calculating...";
+        velocityText.text = "Velocity: Calculating...";
     }
 
     // Update is called once per frame
